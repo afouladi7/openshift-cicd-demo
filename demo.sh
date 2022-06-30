@@ -85,10 +85,6 @@ command.install() {
   oc policy add-role-to-user system:image-puller system:serviceaccount:$dev_prj:default -n $cicd_prj
   oc policy add-role-to-user system:image-puller system:serviceaccount:$stage_prj:default -n $cicd_prj
 
-  info "Grants permissions to ArgoCD instances to manage resources in target namespaces"
-  oc label ns $dev_prj argocd.argoproj.io/managed-by=$cicd_prj
-  oc label ns $stage_prj argocd.argoproj.io/managed-by=$cicd_prj
-
   info "Deploying CI/CD infra to $cicd_prj namespace"
   oc apply -f infra -n $cicd_prj
   GITEA_HOSTNAME=$(oc get route gitea -o template --template='{{.spec.host}}' -n $cicd_prj)
@@ -138,6 +134,10 @@ EOF
     sleep 3
   done
 
+  info "Grants permissions to ArgoCD instances to manage resources in target namespaces"
+  oc label ns $dev_prj argocd.argoproj.io/managed-by=$cicd_prj
+  oc label ns $stage_prj argocd.argoproj.io/managed-by=$cicd_prj
+
   oc project $cicd_prj
 
   cat <<-EOF
@@ -150,7 +150,7 @@ EOF
   1) Go to spring-petclinic Git repository in Gitea:
      http://$GITEA_HOSTNAME/gitea/spring-petclinic.git
 
-  2) Log into Gitea with username/password: gitea/gitea
+  2) Log into Gitea with username/password: gitea/openshift
 
   3) Edit a file in the repository and commit to trigger the pipeline
 
