@@ -126,6 +126,8 @@ spec:
     repoURL: http://$GITEA_HOSTNAME/gitea/spring-petclinic-config
 EOF
   oc apply -k argo -n $cicd_prj
+  oc create ns afouladi 
+  oc apply -f argo/argocd-parksmap-afouladi.yaml
 
   info "Wait for Argo CD route..."
 
