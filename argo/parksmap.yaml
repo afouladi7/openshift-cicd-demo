@@ -1,0 +1,72 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: parksmap
+  namespace: demo
+  labels:
+    app: workshop
+    app.kubernetes.io/component: parksmap
+    app.kubernetes.io/instance: parksmap
+    app.kubernetes.io/name: parksmap
+    app.kubernetes.io/part-of: workshop
+    component: parksmap
+    role: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: parksmap
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: parksmap
+        component: parksmap
+        deploymentconfig: parksmap
+        role: frontend
+    spec:
+      containers:
+        - name: parksmap
+          image: >-
+            quay.io/openshiftroadshow/parksmap:latest
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          resources: {}
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: parksmap
+  namespace: demo
+  labels:
+    app: parksmap
+    app.kubernetes.io/component: parksmap
+    app.kubernetes.io/instance: parksmap
+    app.kubernetes.io/name: parksmap
+    app.kubernetes.io/part-of: parksmap-app
+    app.openshift.io/runtime-version: latest
+spec:
+  selector:
+    app: parksmap
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: parksmap
+  namespace: demo
+spec:
+  path: /
+  to:
+    kind: Service
+    name: parksmap
+  port:
+    targetPort: 8080
+  tls:
+    termination: edge
+  wildcardPolicy: None
