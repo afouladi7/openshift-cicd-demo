@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dev-parksmap
+spec:
+  destination:
+    namespace: afouladi
+    server: https://kubernetes.default.svc
+  project: spring-petclinic
+  source:
+    directory:
+      include: parksmap.yaml
+    path: argo/
+    repoURL: https://github.com/afouladi7/openshift-cicd-demo
+    targetRevision: HEAD
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
