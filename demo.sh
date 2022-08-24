@@ -44,6 +44,7 @@ done
 declare -r dev_prj="$PRJ_PREFIX-dev"
 declare -r stage_prj="$PRJ_PREFIX-stage"
 declare -r cicd_prj="$PRJ_PREFIX-cicd"
+declare -r parks_prj="afouladi"
 
 command.help() {
   cat <<-EOF
@@ -68,7 +69,7 @@ EOF
 command.install() {
   oc version >/dev/null 2>&1 || err "no oc binary found"
 
-  info "Creating namespaces $cicd_prj, $dev_prj, $stage_prj"
+  info "Creating namespaces $cicd_prj, $dev_prj, $stage_prj, $parks_prj"
   oc get ns $cicd_prj 2>/dev/null  || {
     oc new-project $cicd_prj
   }
@@ -77,6 +78,9 @@ command.install() {
   }
   oc get ns $stage_prj 2>/dev/null  || {
     oc new-project $stage_prj
+  }
+  oc get ns $parks_prj 2>/dev/null  || {
+    oc new-project $parks_prj
   }
 
   info "Configure service account permissions for pipeline"
@@ -126,8 +130,6 @@ spec:
     repoURL: http://$GITEA_HOSTNAME/gitea/spring-petclinic-config
 EOF
   oc apply -k argo -n $cicd_prj
-  oc create ns afouladi 
-  oc apply -f argo/argocd-parksmap-afouladi.yaml
 
   info "Wait for Argo CD route..."
 
@@ -139,6 +141,7 @@ EOF
   info "Grants permissions to ArgoCD instances to manage resources in target namespaces"
   oc label ns $dev_prj argocd.argoproj.io/managed-by=$cicd_prj
   oc label ns $stage_prj argocd.argoproj.io/managed-by=$cicd_prj
+  oc label ns $parks_prj argocd.argoproj.io/managed-by=$cicd_prj
 
   oc project $cicd_prj
 
