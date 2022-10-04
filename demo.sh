@@ -21,7 +21,7 @@ err() {
 
 while (( "$#" )); do
   case "$1" in
-    install|uninstall|start)
+    install|custom|uninstall|start)
       COMMAND=$1
       shift
       ;;
@@ -44,7 +44,7 @@ done
 declare -r dev_prj="$PRJ_PREFIX-dev"
 declare -r stage_prj="$PRJ_PREFIX-stage"
 declare -r cicd_prj="$PRJ_PREFIX-cicd"
-declare -r parks_prj="afouladi"
+declare -r parks_prj="$PRJ_PREFIX-parksmap"
 
 command.help() {
   cat <<-EOF
@@ -56,8 +56,9 @@ command.help() {
       demo install --project-prefix mydemo
 
   COMMANDS:
-      install                        Sets up the demo and creates namespaces
+      install                        Sets up the demo and creates namespaces, this accept default applications
       uninstall                      Deletes the demo
+      custom                         Sets up defaults, but will ask you for a custom deployment to put under Argo management
       start                          Starts the deploy DEV pipeline
       help                           Help about this command
 
@@ -176,12 +177,49 @@ EOF
 EOF
 }
 
+command.custom() {
+
+  read -p "What is the name of your Application? " custom_app
+  info "Creating namespaces $custom_app"
+  oc get ns $custom_app 2>/dev/null  || {
+    oc new-project $custom_app
+  }
+
+  read -p "What is the url to the git repo for the deployment? YAML File has to be in a folder " git_url
+  read -p "Parent folder name " folder
+
+  cat << EOF | oc apply -n $cicd_prj -f -
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dev-$custom_app
+spec:
+  destination:
+    namespace: $custom_app
+    server: https://kubernetes.default.svc
+  project: spring-petclinic
+  source:
+    directory:
+      include: parksmap.yaml
+    path: $folder/
+    repoURL: $git_url
+    targetRevision: HEAD
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+EOF
+
+oc label ns $custom_app argocd.argoproj.io/managed-by=$cicd_prj
+
+}
+
 command.start() {
   oc create -f runs/pipeline-build-run.yaml -n $cicd_prj
 }
 
 command.uninstall() {
-  oc delete project $dev_prj $stage_prj $cicd_prj
+  oc delete project $dev_prj $stage_prj $cicd_prj $parks_prj
 }
 
 main() {
