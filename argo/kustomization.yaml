@@ -3,7 +3,7 @@ resources:
 - argocd-petclinic-project.yaml
 - argocd-app-dev.yaml
 - argocd-app-stage.yaml
-- parksmap.yaml
+- argocd-petclinic-project.yaml
 
 patchesStrategicMerge:
 - tmp-argocd-app-patch.yaml
