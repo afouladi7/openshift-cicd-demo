@@ -14,7 +14,6 @@ spec:
         resources:
           requests:
             storage: 5Gi
-        storageClassName: gp2
   - name: maven-settings
     configMap:
       name: maven-settings
