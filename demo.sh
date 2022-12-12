@@ -72,16 +72,16 @@ command.install() {
 
   info "Creating namespaces $cicd_prj, $dev_prj, $stage_prj, $parks_prj"
   oc get ns $cicd_prj 2>/dev/null  || {
-    oc new-project $cicd_prj
+    oc create ns $cicd_prj
   }
   oc get ns $dev_prj 2>/dev/null  || {
-    oc new-project $dev_prj
+    oc create ns $dev_prj
   }
   oc get ns $stage_prj 2>/dev/null  || {
-    oc new-project $stage_prj
+    oc create ns $stage_prj
   }
   oc get ns $parks_prj 2>/dev/null  || {
-    oc new-project $parks_prj
+    oc create ns $parks_prj
   }
 
   info "Configure service account permissions for pipeline"

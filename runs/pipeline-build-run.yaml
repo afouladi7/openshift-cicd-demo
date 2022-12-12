@@ -7,8 +7,13 @@ spec:
     name: petclinic-build
   workspaces:
   - name: workspace
-    persistentVolumeClaim:
-      claimName: petclinic-build-workspace
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 5Gi
   - name: maven-settings
     configMap:
       name: maven-settings
