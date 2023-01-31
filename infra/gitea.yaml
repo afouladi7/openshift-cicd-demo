@@ -48,7 +48,7 @@ spec:
       containers:
       - name: postgresql
         imagePullPolicy: Always
-        image: postgresql:latest
+        image: postgres:latest
         env:
         - name: POSTGRESQL_USER
           value: gitea
